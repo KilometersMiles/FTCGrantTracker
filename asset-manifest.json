@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/KilometersMiles/FTCGrantTracker/static/css/main.e6c13ad2.css",
+    "main.js": "/KilometersMiles/FTCGrantTracker/static/js/main.c3f3b5b0.js",
+    "static/js/453.b96e90c2.chunk.js": "/KilometersMiles/FTCGrantTracker/static/js/453.b96e90c2.chunk.js",
+    "index.html": "/KilometersMiles/FTCGrantTracker/index.html",
+    "main.e6c13ad2.css.map": "/KilometersMiles/FTCGrantTracker/static/css/main.e6c13ad2.css.map",
+    "main.c3f3b5b0.js.map": "/KilometersMiles/FTCGrantTracker/static/js/main.c3f3b5b0.js.map",
+    "453.b96e90c2.chunk.js.map": "/KilometersMiles/FTCGrantTracker/static/js/453.b96e90c2.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.e6c13ad2.css",
+    "static/js/main.c3f3b5b0.js"
+  ]
+}

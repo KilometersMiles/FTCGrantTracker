@@ -1,8 +1,8 @@
 import { Card, CardContent, Typography, Button, Chip, Link, Box, ButtonGroup } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
-import { applyForGrant } from '../services/applicationService';
+import { applyForGrant, getUserApplicationsForGrant } from '../services/applicationService';
 import { format, isValid } from 'date-fns';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { updateDoc, doc, Timestamp, FieldValue } from 'firebase/firestore';
 import { db } from '../firebase';
 
@@ -11,32 +11,57 @@ function GrantCard({ grant = {} }) {  // Default to empty object if grant is und
   const [isApplying, setIsApplying] = useState(false);
   const [isInterested, setIsInterested] = useState(false);
   const [hasApplied, setHasApplied] = useState(false);
+  
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const userAppIds = await getUserApplicationsForGrant(currentUser.uid, grant.id);
+        console.log(userAppIds);
+
+        //if an application is interested, set isInterested
+        userAppIds.forEach(function(application) {
+          if (application.status === "interested") {
+            setIsInterested(true);
+          }
+          if (application.status === "pending") {
+            setIsApplying(true);
+            setIsInterested(true);
+          }
+
+        });    
+      } catch (error) {
+          console.error("Error loading data:", error);
+      }
+    }
+    loadData();
+  }, [currentUser]); // Add currentUser to dependencies
+
   const handleInterest = async () => {
+    if (!id) return;  // Don't proceed if no grant ID
+    
+    setIsInterested(true);
     try {
-      await updateDoc(doc(db, 'userInterests', currentUser.uid), {
-        [grant.id]: isInterested ? FieldValue.delete() : true
-      }, { merge: true });
-      setIsInterested(!isInterested);
+      await applyForGrant(currentUser.uid, id, "interested",`Applied via FTC Grants Tracker`);
+      alert('Application submitted successfully!');
     } catch (error) {
-      console.error("Error updating interest:", error);
-    }
+      console.error('Error marking interest', error);
+      alert('Failed to mark interest, oof');
+    } 
   };
 
-  const handleApplied = async () => {
+  const handleApply = async () => {
+    if (!id) return;  // Don't proceed if no grant ID
+    
+    setIsApplying(true);
+    setIsInterested(true);
     try {
-      await updateDoc(doc(db, 'userApplications', currentUser.uid), {
-        [grant.id]: {
-          appliedAt: Timestamp.now(),
-          status: 'applied'
-        }
-      }, { merge: true });
-      setHasApplied(true);
-      alert("Marked as applied! You'll need to apply through the grant's official website.");
+      await applyForGrant(currentUser.uid, id, "pending",`Applied via FTC Grants Tracker`);
+      alert('Application submitted successfully!');
     } catch (error) {
-      console.error("Error marking as applied:", error);
+      console.error('Error applying for grant:', error);
+      alert('Failed to submit application');
     }
   };
-
 
   // Safe access to grant properties with defaults
   const {
@@ -45,26 +70,15 @@ function GrantCard({ grant = {} }) {  // Default to empty object if grant is und
     description = 'No description available',
     startDate = null,
     endDate = null,
-    location = null,
+    latitude = null,
+    longitude = null,
+    radius = null,
     eligibility = '',
     amount = '',
-    website = ''
+    website = '',
+    verified = null,
   } = grant;
 
-  const handleApply = async () => {
-    if (!id) return;  // Don't proceed if no grant ID
-    
-    setIsApplying(true);
-    try {
-      await applyForGrant(currentUser.uid, id, `Applied via FTC Grants Tracker`);
-      alert('Application submitted successfully!');
-    } catch (error) {
-      console.error('Error applying for grant:', error);
-      alert('Failed to submit application');
-    } finally {
-      setIsApplying(false);
-    }
-  };
 
   // Safe date formatting
   const formatDateSafe = (date) => {
@@ -80,10 +94,10 @@ function GrantCard({ grant = {} }) {  // Default to empty object if grant is und
   };
 
   // Get coordinates if available
-  const coords = location
-    ? `Lat: ${location.latitude?.toFixed(4) || 'N/A'}, Lng: ${location.longitude?.toFixed(4) || 'N/A'}`
+  const coords = latitude != null
+    ? `Lat: ${latitude?.toFixed(4) || 'N/A'}, Lng: ${longitude?.toFixed(4) || "N/A"}, Rad: ${radius || "N/A"}`
     : 'Location not specified';
-
+  
   return (
     <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <CardContent sx={{ flexGrow: 1 }}>
@@ -115,9 +129,9 @@ function GrantCard({ grant = {} }) {  // Default to empty object if grant is und
             size="small"
             sx={{ mr: 1, mb: 1 }}
           />
-          {location && location.latitude && location.longitude && (
+          {latitude && longitude && (
             <Link 
-              href={`https://www.google.com/maps?q=${location.latitude},${location.longitude}`}
+              href={`https://www.google.com/maps?q=${latitude},${longitude}`}
               target="_blank"
               rel="noopener"
             >
@@ -156,15 +170,16 @@ function GrantCard({ grant = {} }) {  // Default to empty object if grant is und
                 <Button 
                 variant={isInterested ? "contained" : "outlined"}
                 onClick={handleInterest}
+                disabled={isApplying}
                 >
                 {isInterested ? "Interested ✓" : "I'm Interested"}
                 </Button>
                 <Button 
-                variant={hasApplied ? "contained" : "outlined"} 
-                color={hasApplied ? "success" : "primary"}
-                onClick={handleApplied}
+                variant={isApplying ? "contained" : "outlined"} 
+                color={isApplying ? "success" : "primary"}
+                onClick={handleApply}
                 >
-                {hasApplied ? "Applied ✓" : "Mark as Applied"}
+                {isApplying ? "Applied ✓" : "Mark as Applied"}
                 </Button>
             </ButtonGroup>
 

@@ -18,11 +18,11 @@ function App() {
           <Route path="/grants" element={<GrantsPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignUpPage />} />
-          <Route path="/my-applications" element={
+          {/* <Route path="/my-applications" element={
             <PrivateRoute>
               <MyApplicationsPage />
             </PrivateRoute>
-          } />
+          } /> */}
         </Routes>
       </AuthProvider>
     </Router>

@@ -14,51 +14,51 @@ function GrantsPage() {
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const { currentUser } = useAuth();
 
-useEffect(() => {
-  const loadData = async () => {
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const [allGrants, userAppIds] = await Promise.all([
+          getAllGrants(),
+          currentUser ? fetchUserApplications(currentUser.uid) : []
+        ]);
+        
+        // Filter out unverified grants
+        const availableGrants = allGrants.filter(
+          grant => grant.verified || currentUser.uid == grant.createdBy
+        );
+        
+        setGrants(availableGrants);
+      } catch (error) {
+        console.error("Error loading data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, [currentUser]); // Add currentUser to dependencies
+
+  const handleAddGrant = async (newGrant) => {
     try {
-      setLoading(true);
-      const [allGrants, userAppIds] = await Promise.all([
-        getAllGrants(),
-        currentUser ? fetchUserApplications(currentUser.uid) : []
-      ]);
-      
-      // Filter out applied grants
-      const availableGrants = allGrants.filter(
-        grant => !userAppIds.includes(grant.id)
-      );
-      
-      setGrants(availableGrants);
+      await addGrant({
+        ...newGrant,
+        createdBy: currentUser.uid // Add creator ID
+      });
+      const updatedGrants = await getAllGrants();
+      setGrants(updatedGrants);
+      setOpenAddDialog(false);
+      alert('Grant added successfully!'); // Add success feedback
     } catch (error) {
-      console.error("Error loading data:", error);
-    } finally {
-      setLoading(false);
+      console.error("Error adding grant:", error);
+      alert(`Failed to add grant: ${error.message}`); // Show error message
     }
   };
-  loadData();
-}, [currentUser]); // Add currentUser to dependencies
-
-const handleAddGrant = async (newGrant) => {
-  try {
-    await addGrant({
-      ...newGrant,
-      createdBy: currentUser.uid // Add creator ID
-    });
-    const updatedGrants = await getAllGrants();
-    setGrants(updatedGrants);
-    setOpenAddDialog(false);
-    alert('Grant added successfully!'); // Add success feedback
-  } catch (error) {
-    console.error("Error adding grant:", error);
-    alert(`Failed to add grant: ${error.message}`); // Show error message
-  }
-};
-const fetchUserApplications = async (userId) => {
-  const applicationsCol = collection(db, 'userApplications');
-  const q = query(applicationsCol, where('userId', '==', userId));
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => doc.data().grantId);
-};
+  const fetchUserApplications = async (userId) => {
+    const applicationsCol = collection(db, 'userApplications');
+    const q = query(applicationsCol, where('userId', '==', userId));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => doc.data().grantId);
+  };
 
   return (
     <Container maxWidth="lg">

@@ -18,7 +18,7 @@ function LoginPage() {
     
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate('/my-applications');
+      navigate('/grants');
     } catch (err) {
       setError(err.message);
       setLoading(false);
@@ -32,7 +32,7 @@ function LoginPage() {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-      navigate('/my-applications');
+      navigate('/grants');
     } catch (err) {
       setError(err.message);
       setLoading(false);

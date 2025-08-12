@@ -20,10 +20,12 @@ function AddGrantDialog({ open, onClose, onSubmit }) {
     endDate: '',
     latitude: '',
     longitude: '',
+    radius: '',
     eligibility: '',
     amount: '',
     website: '',
-    contactEmail: ''
+    contactEmail: '',
+    verified: false,
   });
   const [error, setError] = useState(''); // Add error state
 
@@ -97,13 +99,14 @@ function AddGrantDialog({ open, onClose, onSubmit }) {
       eligibility: '',
       amount: '',
       website: '',
-      contactEmail: ''
+      contactEmail: '',
+      verified: false
     });
   };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Add New Grant</DialogTitle>
+      <DialogTitle>Add New Grant To List (Must be approved by admin)</DialogTitle>
       <DialogContent>
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         
@@ -152,7 +155,7 @@ function AddGrantDialog({ open, onClose, onSubmit }) {
             />
           </Stack>
           
-          <Typography variant="subtitle1">Location (Coordinates)</Typography>
+          <Typography variant="subtitle1">Location Coordinates (If applicable)</Typography>
           <Stack direction="row" spacing={2}>
             <TextField
               name="latitude"
@@ -161,7 +164,6 @@ function AddGrantDialog({ open, onClose, onSubmit }) {
               value={formData.latitude}
               onChange={handleChange}
               fullWidth
-              required
               inputProps={{ 
                 step: "0.000001",
                 min: "-90",
@@ -176,11 +178,23 @@ function AddGrantDialog({ open, onClose, onSubmit }) {
               value={formData.longitude}
               onChange={handleChange}
               fullWidth
-              required
               inputProps={{ 
                 step: "0.000001",
                 min: "-180",
                 max: "180"
+              }}
+            />
+            <TextField
+              name="radius"
+              label="Radius (Miles)"
+              type="number"
+              value={formData.radius}
+              onChange={handleChange}
+              fullWidth
+              inputProps={{ 
+                step: ".1",
+                min: "0",
+                max: "1000"
               }}
             />
           </Stack>

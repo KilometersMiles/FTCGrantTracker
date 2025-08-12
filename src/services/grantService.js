@@ -24,9 +24,13 @@ export async function getAllGrants() {
         description: data.description || '',
         startDate: data.startDate?.toDate?.() || null,
         endDate: data.endDate?.toDate?.() || null,
+        latitude: data.latitude || null,  
+        longitude: data.longitude || null,  
+        radius: data.radius || null,
         eligibility: data.eligibility || '',
         amount: data.amount || '',
         website: data.website || '',
+        verified: data.verified || false,
         contactEmail: data.contactEmail || '',
         createdAt: data.createdAt?.toDate?.() || null,
         updatedAt: data.updatedAt?.toDate?.() || null,
@@ -66,7 +70,9 @@ export async function getGrantById(grantId) {
     ...data,
     // Safely convert Timestamp to Date objects
     startDate: data.startDate?.toDate?.() || null,
-    endDate: data.endDate?.toDate?.() || null
+    endDate: data.endDate?.toDate?.() || null,
+    latitude: data.latitude || null,  
+    longitude: data.longitude || null,  
+    radius: data.radius || null 
   };
 }
-

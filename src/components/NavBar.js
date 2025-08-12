@@ -30,14 +30,14 @@ function NavBar() {
         
         {currentUser ? (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Button 
+            {/* <Button 
               color="inherit" 
               component={RouterLink} 
               to="/my-applications"
               sx={{ mr: 2 }}
             >
               My Applications
-            </Button>
+            </Button> */}
             
             <Avatar 
               sx={{ width: 32, height: 32, mr: 1 }}
